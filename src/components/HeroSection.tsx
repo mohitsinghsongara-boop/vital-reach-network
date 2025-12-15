@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Heart, MapPin, Bell, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   return (
@@ -62,13 +63,17 @@ const HeroSection = () => {
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-fade-in-up"
             style={{ animationDelay: "0.3s" }}
           >
-            <Button variant="hero" size="xl" className="w-full sm:w-auto group">
-              Find Blood Now
-              <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-            </Button>
-            <Button variant="glass" size="xl" className="w-full sm:w-auto">
-              Register as Donor
-            </Button>
+            <Link to="/search">
+              <Button variant="hero" size="xl" className="w-full sm:w-auto group">
+                Find Blood Now
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
+            <Link to="/register">
+              <Button variant="glass" size="xl" className="w-full sm:w-auto">
+                Register as Donor
+              </Button>
+            </Link>
           </div>
 
           {/* Stats Cards */}

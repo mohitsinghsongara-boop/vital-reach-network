@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Droplet, Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -58,12 +59,16 @@ const Header = () => {
 
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm">
-            Sign In
-          </Button>
-          <Button variant="hero" size="sm">
-            Donate Now
-          </Button>
+          <Link to="/auth">
+            <Button variant="ghost" size="sm">
+              Sign In
+            </Button>
+          </Link>
+          <Link to="/register">
+            <Button variant="hero" size="sm">
+              Donate Now
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}
@@ -91,12 +96,16 @@ const Header = () => {
               </a>
             ))}
             <div className="flex flex-col gap-3 pt-4 border-t border-border">
-              <Button variant="ghost" className="w-full">
-                Sign In
-              </Button>
-              <Button variant="hero" className="w-full">
-                Donate Now
-              </Button>
+              <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full">
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button variant="hero" className="w-full">
+                  Donate Now
+                </Button>
+              </Link>
             </div>
           </nav>
         </div>
