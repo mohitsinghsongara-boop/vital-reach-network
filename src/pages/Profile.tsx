@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { BloodType } from '@/types';
 
@@ -36,6 +35,7 @@ const Profile = () => {
     try {
       updateUser({
         ...formData,
+        bloodType: formData.bloodType as BloodType,
         location: {
           latitude: user?.location?.latitude || 0,
           longitude: user?.location?.longitude || 0,
