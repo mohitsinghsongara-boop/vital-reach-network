@@ -51,7 +51,7 @@ const Messages = () => {
   const loadMessages = async (conversationId: string) => {
     try {
       const data = await messageAPI.getMessages(conversationId);
-      setMessages(data);
+      setMessages(data as any[]);
     } catch (error) {
       console.error('Failed to load messages:', error);
     }
@@ -60,7 +60,7 @@ const Messages = () => {
   const loadConversations = async () => {
     try {
       const data = await messageAPI.getConversations();
-      setConversations(data);
+      setConversations(data as any[]);
     } catch (error) {
       console.error('Failed to load conversations:', error);
     }
