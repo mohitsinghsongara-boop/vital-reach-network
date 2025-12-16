@@ -7,13 +7,17 @@ import { Droplet, MapPin, Calendar, Bell, Search, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const DonorDashboard = () => {
-  const { user } = useAuth();
+  const { profile, donorProfile } = useAuth();
+
+  const displayName = profile?.first_name 
+    ? `${profile.first_name}${profile.last_name ? ' ' + profile.last_name : ''}`
+    : 'Donor';
 
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.name}!</h1>
+          <h1 className="text-3xl font-bold mb-2">Welcome back, {displayName}!</h1>
           <p className="text-muted-foreground">Ready to save lives today?</p>
         </div>
 
@@ -25,9 +29,9 @@ const DonorDashboard = () => {
               <Droplet className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{user?.bloodType}</div>
-              <Badge variant={user?.isAvailable ? "default" : "secondary"} className="mt-2">
-                {user?.isAvailable ? 'Available' : 'Not Available'}
+              <div className="text-2xl font-bold">{donorProfile?.blood_type || 'Not set'}</div>
+              <Badge variant={donorProfile?.availability === 'available' ? "default" : "secondary"} className="mt-2">
+                {donorProfile?.availability === 'available' ? 'Available' : 'Not Available'}
               </Badge>
             </CardContent>
           </Card>
@@ -38,7 +42,7 @@ const DonorDashboard = () => {
               <Heart className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold">{donorProfile?.total_donations || 0}</div>
               <p className="text-xs text-muted-foreground mt-1">Lives saved</p>
             </CardContent>
           </Card>
@@ -120,4 +124,3 @@ const DonorDashboard = () => {
 };
 
 export default DonorDashboard;
-

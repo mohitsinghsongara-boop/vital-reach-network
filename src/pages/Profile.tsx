@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -10,40 +10,76 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { BloodType } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 
 const Profile = () => {
-  const { user, updateUser } = useAuth();
+  const { user, profile, donorProfile, role, updateProfile, refreshProfile } = useAuth();
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    bloodType: user?.bloodType || '',
-    isAvailable: user?.isAvailable ?? false,
-    location: {
-      address: user?.location?.address || '',
-      city: user?.location?.city || '',
-      state: user?.location?.state || '',
-      zipCode: user?.location?.zipCode || '',
-    },
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zip_code: '',
+    bloodType: '' as BloodType | '',
+    isAvailable: false,
   });
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        first_name: profile.first_name || '',
+        last_name: profile.last_name || '',
+        email: profile.email || '',
+        phone: profile.phone || '',
+        address: profile.address || '',
+        city: profile.city || '',
+        state: profile.state || '',
+        zip_code: profile.zip_code || '',
+        bloodType: donorProfile?.blood_type || '',
+        isAvailable: donorProfile?.availability === 'available',
+      });
+    }
+  }, [profile, donorProfile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
 
     try {
-      updateUser({
-        ...formData,
-        bloodType: formData.bloodType as BloodType,
-        location: {
-          latitude: user?.location?.latitude || 0,
-          longitude: user?.location?.longitude || 0,
-          ...formData.location,
-        },
+      // Update profile
+      const { error: profileError } = await updateProfile({
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip_code: formData.zip_code,
       });
+
+      if (profileError) throw profileError;
+
+      // Update donor profile if applicable
+      if (role === 'donor' && user) {
+        const { error: donorError } = await supabase
+          .from('donor_profiles')
+          .upsert({
+            user_id: user.id,
+            blood_type: formData.bloodType as BloodType,
+            availability: formData.isAvailable ? 'available' : 'unavailable',
+          });
+
+        if (donorError) throw donorError;
+      }
+
+      await refreshProfile();
       toast.success('Profile updated successfully!');
     } catch (error) {
+      console.error('Error updating profile:', error);
       toast.error('Failed to update profile');
     } finally {
       setIsSaving(false);
@@ -69,14 +105,24 @@ const Profile = () => {
                   <CardDescription>Update your personal details</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      required
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="first_name">First Name</Label>
+                      <Input
+                        id="first_name"
+                        value={formData.first_name}
+                        onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="last_name">Last Name</Label>
+                      <Input
+                        id="last_name"
+                        value={formData.last_name}
+                        onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
@@ -84,8 +130,6 @@ const Profile = () => {
                       id="email"
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      required
                       disabled
                     />
                     <p className="text-xs text-muted-foreground">Email cannot be changed</p>
@@ -97,15 +141,15 @@ const Profile = () => {
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+1234567890"
+                      placeholder="+91 9876543210"
                     />
                   </div>
-                  {(user?.role === 'donor' || user?.role === 'receiver') && (
+                  {role === 'donor' && (
                     <div className="space-y-2">
                       <Label htmlFor="bloodType">Blood Type</Label>
                       <Select
                         value={formData.bloodType}
-                        onValueChange={(value) => setFormData({ ...formData, bloodType: value })}
+                        onValueChange={(value) => setFormData({ ...formData, bloodType: value as BloodType })}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select blood type" />
@@ -133,13 +177,8 @@ const Profile = () => {
                     <Label htmlFor="address">Address</Label>
                     <Input
                       id="address"
-                      value={formData.location.address}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          location: { ...formData.location, address: e.target.value },
-                        })
-                      }
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                       placeholder="Street address"
                     />
                   </div>
@@ -148,13 +187,8 @@ const Profile = () => {
                       <Label htmlFor="city">City</Label>
                       <Input
                         id="city"
-                        value={formData.location.city}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            location: { ...formData.location, city: e.target.value },
-                          })
-                        }
+                        value={formData.city}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                         placeholder="City"
                       />
                     </div>
@@ -162,32 +196,22 @@ const Profile = () => {
                       <Label htmlFor="state">State</Label>
                       <Input
                         id="state"
-                        value={formData.location.state}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            location: { ...formData.location, state: e.target.value },
-                          })
-                        }
+                        value={formData.state}
+                        onChange={(e) => setFormData({ ...formData, state: e.target.value })}
                         placeholder="State"
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="zipCode">ZIP Code</Label>
+                    <Label htmlFor="zip_code">ZIP Code</Label>
                     <Input
-                      id="zipCode"
-                      value={formData.location.zipCode}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          location: { ...formData.location, zipCode: e.target.value },
-                        })
-                      }
+                      id="zip_code"
+                      value={formData.zip_code}
+                      onChange={(e) => setFormData({ ...formData, zip_code: e.target.value })}
                       placeholder="12345"
                     />
                   </div>
-                  {user?.role === 'donor' && (
+                  {role === 'donor' && (
                     <div className="flex items-center justify-between pt-4 border-t">
                       <div className="space-y-0.5">
                         <Label htmlFor="available">Available for Donation</Label>
@@ -224,6 +248,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
-
-

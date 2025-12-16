@@ -7,13 +7,17 @@ import { Droplet, Search, AlertCircle, MapPin, MessageSquare, Plus } from 'lucid
 import { Link } from 'react-router-dom';
 
 const ReceiverDashboard = () => {
-  const { user } = useAuth();
+  const { profile } = useAuth();
+
+  const displayName = profile?.first_name 
+    ? `${profile.first_name}${profile.last_name ? ' ' + profile.last_name : ''}`
+    : 'User';
 
   return (
     <DashboardLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Welcome, {user?.name}</h1>
+          <h1 className="text-3xl font-bold mb-2">Welcome, {displayName}</h1>
           <p className="text-muted-foreground">Find compatible blood donors and blood banks</p>
         </div>
 
@@ -24,7 +28,7 @@ const ReceiverDashboard = () => {
               <Droplet className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{user?.bloodType || 'N/A'}</div>
+              <div className="text-2xl font-bold">Any</div>
             </CardContent>
           </Card>
 
@@ -76,7 +80,7 @@ const ReceiverDashboard = () => {
                   New Blood Request
                 </Button>
               </Link>
-              <Link to="/request/emergency">
+              <Link to="/emergency">
                 <Button variant="destructive" className="w-full">
                   <AlertCircle className="mr-2 h-4 w-4" />
                   Emergency Request
@@ -91,13 +95,13 @@ const ReceiverDashboard = () => {
               <CardDescription>Search for compatible blood sources</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Link to="/search/donors">
+              <Link to="/search">
                 <Button variant="outline" className="w-full justify-start">
                   <Search className="mr-2 h-4 w-4" />
                   Search Donors
                 </Button>
               </Link>
-              <Link to="/search/blood-banks">
+              <Link to="/search">
                 <Button variant="outline" className="w-full justify-start">
                   <MapPin className="mr-2 h-4 w-4" />
                   Find Blood Banks
@@ -126,4 +130,3 @@ const ReceiverDashboard = () => {
 };
 
 export default ReceiverDashboard;
-
