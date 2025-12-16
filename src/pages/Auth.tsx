@@ -1,45 +1,144 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Droplet, Mail, Lock, User, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Droplet, Mail, Lock, User, ArrowLeft, Eye, EyeOff, Phone } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { BloodType, UserRole } from "@/types";
+
+const BLOOD_TYPES: BloodType[] = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
+    phone: "",
+    role: "donor" as UserRole,
+    bloodType: "" as BloodType | "",
   });
+  
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login, register, isAuthenticated } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate auth process
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast({
-      title: isLogin ? "Welcome back!" : "Account created!",
-      description: isLogin 
-        ? "You've been signed in successfully." 
-        : "Please check your email to verify your account.",
-    });
+
+    try {
+      if (isLogin) {
+        const { error } = await login(formData.email, formData.password);
+        
+        if (error) {
+          toast({
+            title: "Login failed",
+            description: error.message === "Invalid login credentials" 
+              ? "Invalid email or password. Please try again."
+              : error.message,
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        toast({
+          title: "Welcome back!",
+          description: "You've been signed in successfully.",
+        });
+        navigate("/dashboard");
+      } else {
+        // Validation
+        if (!formData.firstName || !formData.lastName) {
+          toast({
+            title: "Missing information",
+            description: "Please enter your full name.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        if (formData.password.length < 6) {
+          toast({
+            title: "Password too short",
+            description: "Password must be at least 6 characters.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        if (formData.role === 'donor' && !formData.bloodType) {
+          toast({
+            title: "Blood type required",
+            description: "Please select your blood type to register as a donor.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        const { error } = await register({
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          role: formData.role,
+          bloodType: formData.bloodType as BloodType || undefined,
+          phone: formData.phone || undefined,
+        });
+
+        if (error) {
+          let message = error.message;
+          if (message.includes("already registered")) {
+            message = "An account with this email already exists. Please sign in instead.";
+          }
+          
+          toast({
+            title: "Registration failed",
+            description: message,
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        toast({
+          title: "Account created!",
+          description: "Welcome to Red Drop! You can now access your dashboard.",
+        });
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    }
     
     setIsLoading(false);
-    navigate("/dashboard");
   };
 
   return (
     <div className="min-h-screen flex">
       {/* Left Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-background">
+      <div className="flex-1 flex items-center justify-center p-8 bg-background overflow-y-auto">
         <div className="w-full max-w-md">
           {/* Back Link */}
           <Link 
@@ -71,23 +170,90 @@ const Auth = () => {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="John Doe"
-                    className="pl-10 h-12"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required={!isLogin}
-                  />
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Input
+                        id="firstName"
+                        type="text"
+                        placeholder="John"
+                        className="pl-10 h-12"
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        required={!isLogin}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      id="lastName"
+                      type="text"
+                      placeholder="Doe"
+                      className="h-12"
+                      value={formData.lastName}
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                      required={!isLogin}
+                    />
+                  </div>
                 </div>
-              </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number (Optional)</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+91 9876543210"
+                      className="pl-10 h-12"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="role">I am a</Label>
+                  <Select 
+                    value={formData.role} 
+                    onValueChange={(value: UserRole) => setFormData({ ...formData, role: value })}
+                  >
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Select your role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="donor">Blood Donor</SelectItem>
+                      <SelectItem value="receiver">Blood Receiver / Patient</SelectItem>
+                      <SelectItem value="blood_bank">Blood Bank / Hospital</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {formData.role === 'donor' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="bloodType">Blood Type</Label>
+                    <Select 
+                      value={formData.bloodType} 
+                      onValueChange={(value: BloodType) => setFormData({ ...formData, bloodType: value })}
+                    >
+                      <SelectTrigger className="h-12">
+                        <SelectValue placeholder="Select your blood type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {BLOOD_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>{type}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </>
             )}
 
             <div className="space-y-2">
@@ -118,6 +284,7 @@ const Auth = () => {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required
+                  minLength={6}
                 />
                 <button
                   type="button"
@@ -127,6 +294,9 @@ const Auth = () => {
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+              {!isLogin && (
+                <p className="text-xs text-muted-foreground">Must be at least 6 characters</p>
+              )}
             </div>
 
             {isLogin && (

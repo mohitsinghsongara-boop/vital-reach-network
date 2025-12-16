@@ -7,7 +7,11 @@ import { Droplet, Package, TrendingUp, AlertTriangle, Plus, BarChart3 } from 'lu
 import { Link } from 'react-router-dom';
 
 const BloodBankDashboard = () => {
-  const { user } = useAuth();
+  const { profile } = useAuth();
+
+  const displayName = profile?.first_name 
+    ? `${profile.first_name}${profile.last_name ? ' ' + profile.last_name : ''}`
+    : 'Blood Bank';
 
   return (
     <DashboardLayout>
@@ -127,4 +131,3 @@ const BloodBankDashboard = () => {
 };
 
 export default BloodBankDashboard;
-

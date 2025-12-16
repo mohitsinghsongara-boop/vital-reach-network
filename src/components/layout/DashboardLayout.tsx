@@ -18,14 +18,18 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  const { user, logout } = useAuth();
+  const { user, profile, donorProfile, role, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
+
+  const displayName = profile?.first_name 
+    ? `${profile.first_name}${profile.last_name ? ' ' + profile.last_name : ''}`
+    : user?.email || 'User';
 
   const getInitials = (name: string) => {
     return name
@@ -37,7 +41,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   };
 
   const getNavLinks = () => {
-    if (!user) return [];
+    if (!role) return [];
 
     const baseLinks = [
       { href: '/dashboard', label: 'Dashboard', icon: Home },
@@ -45,22 +49,21 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       { href: '/messages', label: 'Messages', icon: MessageSquare },
     ];
 
-    if (user.role === 'donor') {
+    if (role === 'donor') {
       return [
         ...baseLinks,
         { href: '/emergency', label: 'Emergency', icon: Bell },
       ];
     }
 
-    if (user.role === 'receiver') {
+    if (role === 'receiver') {
       return [
         ...baseLinks,
-        { href: '/request', label: 'My Requests', icon: Bell },
         { href: '/emergency', label: 'Emergency', icon: Bell },
       ];
     }
 
-    if (user.role === 'blood_bank') {
+    if (role === 'blood_bank') {
       return [
         ...baseLinks,
         { href: '/inventory', label: 'Inventory', icon: MapPin },
@@ -68,7 +71,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       ];
     }
 
-    if (user.role === 'admin') {
+    if (role === 'admin') {
       return [
         ...baseLinks,
         { href: '/admin/users', label: 'Users', icon: User },
@@ -78,6 +81,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
     return baseLinks;
   };
+
+  const isAvailable = donorProfile?.availability === 'available';
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -113,24 +118,26 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
           {/* User Menu */}
           <div className="flex items-center gap-4">
-            <Badge variant={user?.isAvailable ? 'default' : 'secondary'} className="hidden md:flex">
-              {user?.isAvailable ? 'Available' : 'Unavailable'}
-            </Badge>
+            {role === 'donor' && (
+              <Badge variant={isAvailable ? 'default' : 'secondary'} className="hidden md:flex">
+                {isAvailable ? 'Available' : 'Unavailable'}
+              </Badge>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
-                    <AvatarFallback>{user ? getInitials(user.name) : 'U'}</AvatarFallback>
+                    <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user?.name}</p>
+                    <p className="text-sm font-medium leading-none">{displayName}</p>
                     <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
                     <Badge variant="outline" className="mt-1 w-fit">
-                      {user?.role?.replace('_', ' ')}
+                      {role?.replace('_', ' ')}
                     </Badge>
                   </div>
                 </DropdownMenuLabel>
@@ -165,6 +172,3 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 };
 
 export default DashboardLayout;
-
-
-
