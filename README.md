@@ -1,73 +1,233 @@
-# Welcome to your Lovable project
+# Red Drop - Blood Donation Platform
 
-## Project info
+Red Drop is a comprehensive web-based platform designed to connect blood donors, receivers (patients or hospitals), and blood banks through a centralized system. The platform leverages real-time location tracking and smart search algorithms to enable users to quickly find compatible blood donors or nearby blood banks.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🎯 Project Overview
 
-## How can I edit this code?
+Red Drop facilitates efficient matching between blood donors and receivers based on blood type, location, and availability. It prioritizes rapid communication during emergencies, ensuring life-saving responses.
 
-There are several ways of editing your application.
+## ✨ Key Features
 
-**Use Lovable**
+### Core Features
+- **User Authentication**: Secure registration, login, and role-based access (donor, receiver, blood bank, admin)
+- **Profile Management**: Users can update personal details, blood type, medical history, and location preferences
+- **Search and Matching**: Smart algorithms to filter donors/banks by blood type compatibility, distance, and availability
+- **Real-Time Location Tracking**: Integration with geolocation APIs for live mapping of donors and banks
+- **Emergency System**: One-click emergency requests that trigger notifications to nearby compatible donors/banks
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### Advanced Features
+- **Communication Tools**: Chat/messaging system for direct coordination between users
+- **Notifications**: Push notifications for matches, requests, and reminders
+- **Analytics Dashboard**: For blood banks/admins to view donation trends, inventory levels, and user activity
+- **Reporting**: Generate reports on successful matches, response times, and system usage
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🛠️ Technology Stack
 
-**Use your preferred IDE**
+### Frontend
+- **Framework**: React.js with TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: shadcn/ui
+- **State Management**: React Context API
+- **Routing**: React Router v6
+- **Forms**: React Hook Form with Zod validation
+- **HTTP Client**: Fetch API (with service layer)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Backend (To be implemented)
+- **Framework**: Node.js with Express.js
+- **Database**: MongoDB or PostgreSQL
+- **Authentication**: JWT (JSON Web Tokens)
+- **Real-Time**: Socket.io
+- **API Integrations**: Twilio (SMS), Firebase (Push Notifications)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 📁 Project Structure
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+vital-reach-network/
+├── src/
+│   ├── components/          # Reusable UI components
+│   │   ├── dashboard/       # Role-specific dashboard components
+│   │   ├── layout/         # Layout components
+│   │   └── ui/             # shadcn/ui components
+│   ├── contexts/           # React contexts (Auth, etc.)
+│   ├── pages/              # Page components
+│   ├── services/           # API service layer
+│   ├── types/              # TypeScript type definitions
+│   └── lib/                # Utility functions
+├── public/                 # Static assets
+└── package.json
 ```
 
-**Edit a file directly in GitHub**
+## 🚀 Getting Started
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Prerequisites
+- Node.js 18+ and npm/yarn/pnpm
+- Git
 
-**Use GitHub Codespaces**
+### Installation
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd vital-reach-network
+```
 
-## What technologies are used for this project?
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
 
-This project is built with:
+3. Start the development server:
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+4. Open your browser and navigate to `http://localhost:5173`
 
-## How can I deploy this project?
+### Building for Production
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+```bash
+npm run build
+# or
+yarn build
+# or
+pnpm build
+```
 
-## Can I connect a custom domain to my Lovable project?
+## 👥 User Roles
 
-Yes, you can!
+### Donor
+- Register and manage profile
+- Set availability status
+- Search for blood requests
+- Respond to emergency requests
+- View donation history
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Receiver
+- Register and manage profile
+- Create blood requests
+- Create emergency requests
+- Search for compatible donors and blood banks
+- Communicate with donors/banks
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Blood Bank
+- Register and manage profile
+- Manage blood inventory
+- View and respond to requests
+- Generate reports and analytics
+- Track distribution
+
+### Admin
+- User management and verification
+- System analytics and monitoring
+- Platform configuration
+- Security oversight
+
+## 🔐 Authentication
+
+The application uses JWT-based authentication. Users can:
+- Register with role selection (donor, receiver, blood bank)
+- Login with email and password
+- Access role-specific dashboards
+- Protected routes based on authentication status
+
+## 🗺️ Routing
+
+- `/` - Landing page
+- `/login` - Login page
+- `/register` - Registration page
+- `/dashboard` - Role-specific dashboard
+- `/profile` - User profile management
+- `/search` - Search for donors/banks/receivers
+- `/emergency` - Emergency requests
+- `/messages` - Messaging system (to be implemented)
+- `/analytics` - Analytics dashboard (for admins/blood banks)
+
+## 🩸 Blood Type Compatibility
+
+The platform includes built-in blood type compatibility logic:
+- **A+** can receive from: A+, A-, O+, O-
+- **A-** can receive from: A-, O-
+- **B+** can receive from: B+, B-, O+, O-
+- **B-** can receive from: B-, O-
+- **AB+** can receive from: All types (universal recipient)
+- **AB-** can receive from: A-, B-, AB-, O-
+- **O+** can receive from: O+, O-
+- **O-** can receive from: O- (universal donor)
+
+## 🔌 API Integration
+
+The application includes a comprehensive API service layer (`src/services/api.ts`) with endpoints for:
+- Authentication
+- User management
+- Search functionality
+- Emergency requests
+- Inventory management
+- Messaging
+- Notifications
+- Analytics
+- Location services
+
+**Note**: Currently using mock data. Connect to actual backend API by setting `VITE_API_BASE_URL` environment variable.
+
+## 🎨 Styling
+
+The application uses Tailwind CSS with custom color scheme optimized for a blood donation platform:
+- Primary color: Red/Crimson theme
+- Responsive design for mobile and desktop
+- Dark mode support (to be fully implemented)
+
+## 📝 Development Status
+
+### ✅ Completed
+- Project setup and configuration
+- Authentication system with role-based access
+- User registration and login
+- Dashboard components for all roles
+- Profile management
+- Search functionality
+- Emergency request system
+- API service layer structure
+- Routing and navigation
+
+### 🚧 In Progress / To Do
+- Real-time location tracking with maps integration
+- Messaging/chat system
+- Analytics dashboard
+- Backend API implementation
+- Real-time notifications (Socket.io)
+- SMS/Email notifications integration
+- Testing suite
+- Deployment configuration
+
+## 🤝 Contributing
+
+This is a project in development. Contributions are welcome!
+
+## 📄 License
+
+[Specify your license here]
+
+## 👨‍💻 Development Team
+
+- Frontend Developer
+- Backend Developer
+- Full-Stack Developer
+- UI/UX Designer
+- QA Tester
+- DevOps Engineer
+
+## 📞 Support
+
+For support, please contact [your contact information]
+
+---
+
+**Red Drop** - Connecting lives, one drop at a time. 💉❤️

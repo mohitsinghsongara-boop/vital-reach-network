@@ -59,7 +59,7 @@ const Header = () => {
 
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/auth">
+          <Link to="/login">
             <Button variant="ghost" size="sm">
               Sign In
             </Button>
@@ -96,7 +96,7 @@ const Header = () => {
               </a>
             ))}
             <div className="flex flex-col gap-3 pt-4 border-t border-border">
-              <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
+              <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full">
                   Sign In
                 </Button>
